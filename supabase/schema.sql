@@ -1,0 +1,7 @@
+-- DREAMOPS demonstration schema. Run in Supabase SQL Editor before setting environment variables.
+create table if not exists customers (id uuid primary key default gen_random_uuid(), name text not null, email text, created_at timestamptz default now());
+create table if not exists inventory_items (id uuid primary key default gen_random_uuid(), name text not null, sku text unique not null, on_hand integer not null default 0 check(on_hand >= 0), committed integer not null default 0 check(committed >= 0), reorder_point integer not null default 5);
+create table if not exists orders (id uuid primary key default gen_random_uuid(), order_number text unique not null, customer_id uuid references customers(id), status text not null default 'draft', created_at timestamptz default now());
+create table if not exists order_lines (id uuid primary key default gen_random_uuid(), order_id uuid references orders(id) on delete cascade, inventory_item_id uuid references inventory_items(id), quantity integer not null check(quantity > 0));
+create table if not exists activity_log (id uuid primary key default gen_random_uuid(), message text not null, created_at timestamptz default now());
+alter table customers enable row level security; alter table inventory_items enable row level security; alter table orders enable row level security; alter table order_lines enable row level security; alter table activity_log enable row level security;
